@@ -5,7 +5,7 @@
 
 module d_flip_flop #(
         parameter WDT = 1,
-        parameter RST_VAL = 0
+        parameter RESET_VAL = 0
 )
 (
         input wire clk,
