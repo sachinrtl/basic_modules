@@ -1,0 +1,188 @@
+priority case (1'b1)
+  cond0: y = a;
+  cond1: y = b;
+  cond2: y = c;
+  default: y = d;
+endcase
+
+What priority means
+
+Case items are checked top to bottom
+
+First true match wins
+
+Priority is explicit
+
+How it synthesizes
+
+→ Priority mux chain (like if / else if)
+
+Conceptually:
+
+if (cond0)      y = a;
+else if (cond1) y = b;
+else if (cond2) y = c;
+else            y = d;
+
+//------------------------------------------------------------------
+
+case (sel)
+  2'b00: y = a;
+  2'b01: y = b;
+  2'b10: y = c;
+  default: y = d;
+endcase
+
+  1️⃣ Plain case — Tool assumes NOTHING
+What the tool fears
+
+Two case items might be true (overlap)
+
+Or none might be true
+
+So the tool must guarantee correctness for all illegal cases.
+
+Hardware inferred (safe version)
+
+Internally, the tool builds something like:
+
+d0 = (sel == 2'b00);
+d1 = (sel == 2'b01);
+d2 = (sel == 2'b10);
+d3 = (sel == 2'b11);
+
+y = (d0 & a) |
+    (d1 & b) |
+    (d2 & c) |
+    (d3 & d);
+
+Key characteristics
+
+Parallel decoders
+
+OR-combine all results
+
+Works even if:
+
+Multiple di = 1
+
+Glitches
+
+Unknowns
+
+Cost
+
+More gates
+
+More capacitance
+
+Slightly worse timing
+
+2️⃣ unique case — Tool is allowed to trust you
+What unique promises
+
+“Exactly ONE case item will match — never zero, never multiple.”
+
+This lets the tool remove safety logic.
+
+Hardware inferred (optimized)
+
+The tool can now build:
+
+y = mux(sel,
+        00 → a,
+        01 → b,
+        10 → c,
+        11 → d);
+
+
+or even:
+
+y = a when sel[1:0]==00
+y = b when sel[1:0]==01
+...
+
+What changed
+
+No OR trees
+
+No overlap protection
+
+No masking logic
+
+➡ Cleaner mux
+➡ Shorter critical path
+
+3️⃣ The Crucial Difference (One Sentence)
+
+case must be correct even if multiple items match.
+unique case is allowed to assume only one item ever matches.
+
+That’s it. That’s the core idea.
+
+4️⃣ Why This Matters in Real Silicon
+Timing
+
+case → decode + AND + OR
+
+unique case → direct mux select
+
+Power
+
+Fewer toggling gates
+
+Less switching activity
+
+Area
+
+Fewer gates
+
+5️⃣ FSM Example (Where This Is Obvious)
+FSM state decode
+unique case (state)
+  IDLE  : next = RUN;
+  RUN   : next = WAIT;
+  WAIT  : next = IDLE;
+endcase
+
+
+Why unique?
+
+FSM can only be in one state
+
+Tool removes safety logic
+
+Faster next-state logic
+
+If you used plain case, tool must assume:
+
+“What if state bits are corrupted?”
+
+So it protects hardware.
+
+6️⃣ What About Simulation vs Synthesis?
+Keyword	Simulation Effect	Synthesis Effect
+case	No warnings	Conservative logic
+unique case	Warns on 0 or >1 match	Optimized logic
+priority case	Warns if none match	Priority mux
+7️⃣ Interview-Level Explanation (Memorize This)
+
+“unique case lets the tool assume mutual exclusivity and generate a clean mux.
+Plain case generates defensive logic because overlaps are possible.”
+
+If you say that, you’re above average.
+
+Final Mental Model 🧠
+
+Think of unique as:
+
+“Trust me, this is one-hot / exclusive.”
+
+Think of plain case as:
+
+“I’m not sure, please be safe.”
+
+
+
+
+  
