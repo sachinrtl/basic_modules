@@ -181,7 +181,120 @@ Think of unique as:
 Think of plain case as:
 
 “I’m not sure, please be safe.”
+//-----------------------------------------------------------
+RTL
+unique case (state)
+  IDLE : y = 0;
+  RUN  : y = 1;
+  WAIT : y = 0;
+endcase
 
+1️⃣ Boolean simplification
+
+Let’s rewrite it logically:
+
+y = 1 when state == RUN
+y = 0 otherwise
+
+
+That’s it.
+
+2️⃣ What hardware is actually needed?
+
+Only one compare is needed:
+
+y = (state == RUN)
+
+3️⃣ Gate-level netlist (explicit)
+
+For RUN = 2'b01:
+
+state[1] ----|>o----\
+                     AND ---- y
+state[0] ----------/
+
+
+Where:
+
+state[1] inverted
+
+state[0] non-inverted
+
+Netlist form
+n1 = ~state[1]
+y  = n1 & state[0]
+
+
+That’s literally it.
+
+4️⃣ No mux, no OR tree — WHY?
+
+Because:
+
+IDLE and WAIT both assign 0
+
+unique case allows collapsing cases
+
+Tool does logic minimization
+
+So instead of:
+
+if state == RUN → 1
+else → 0
+
+
+It reduces to a single comparator
+
+5️⃣ Compare with plain case (important contrast)
+Plain case equivalent hardware
+m_idle = (state == IDLE)
+m_run  = (state == RUN)
+m_wait = (state == WAIT)
+
+y = (m_run & 1'b1) |
+    (m_idle & 1'b0) |
+    (m_wait & 1'b0)
+
+
+Which simplifies to:
+
+y = m_run
+
+
+BUT the decode logic still exists unless optimization removes it.
+With unique, the tool is allowed to remove it confidently.
+
+6️⃣ Critical interview insight 🔥
+
+If the RTL were:
+
+unique case (state)
+  IDLE : y = a;
+  RUN  : y = b;
+  WAIT : y = c;
+endcase
+
+Netlist becomes
+y = mux(state)
+
+
+Not decoder + OR.
+
+That’s the key hardware difference.
+
+7️⃣ One-line answer for interview
+
+“This unique case synthesizes to a simple compare: y = (state == RUN), not a priority chain or decoder.”
+
+If you want, next we can:
+
+Compare timing paths (case vs unique case)
+
+Show how illegal state affects silicon
+
+Convert this to one-hot FSM version
+
+Just say the word.
 
 
 
