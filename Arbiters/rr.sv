@@ -25,19 +25,17 @@ module rr #(
       mask_ff <= next_mask;
   end
 
-  always_comb begin
-    next_mask = '1;
-    if(grant[i]) begin
-      for(int i=0; i<N; i++) begin//for1
-        for(int j=i; j<N; j++) begin//for2
-          if(i<=j)
-            nex_mask[i] = 1'b0;
-          else
-            next_mask[i] = 1'b1;
-        end//for2
-      end//for1
+always_comb begin
+  next_mask = mask_ff;
+  for(int i=0; i<N; i++) begin //for1
+    if(grant[i])
+      next_mask = '1;
+      for(int j=0; j<=i; j++) begin//for2
+        next_mask[j] = 1'b0;
+      end
     end//if
-  end
+  end//for1
+end//always_comb
 
 assign masked_req = req & mask_ff;  
 
