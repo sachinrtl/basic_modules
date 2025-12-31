@@ -3,8 +3,6 @@
 module fixed_pri #(
    parameter N = 4
 )(
-   input wire clk,
-   input wire rst_n,
    input wire [N-1:0] req,
    output logic [N-1:0] grant
 );
