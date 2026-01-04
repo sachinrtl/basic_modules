@@ -16,10 +16,12 @@ module fast_2_slow_fb (
     logic mux_1_out;
     logic mux_2_out;   //Mux2 takes inpt pulse
     logic deglitch_ff;
-    logic sync_ff_in_fast_domain;
+    logic [1:0] sync_ff_in_fast_domain;
 
-    logic sync_ff_in_slow_domain;
-    logic pos_edge_detector_ff;
+  logic [1:0] sync_ff_in_slow_domain;
+  logic       pos_edge_detector_ff;
+  
+  assign mux_2_out = in_pulse ? 1'b1 : mux_1_out;
 
   always_ff @(posedge clk_fast) begin
     if(!rst_n_fast)
@@ -45,6 +47,7 @@ module fast_2_slow_fb (
   assign out_pulse = sync_ff_in_slow_domain[1] & ~pos_edge_detector_ff;   //Synchronized pulse in slow domain
 
   //Feedback logic
+  
   always_ff @(posedge clk_fast) begin
     if(!rst_n_fast)
       sync_ff_in_fast_domain <= 2'b00;
