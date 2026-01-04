@@ -1,5 +1,10 @@
 //Pulse stretcher using counter
-
+/*--------------------------------------------------------------------
+Strategy,cfg_stretch_val Formula,Reliability,Throughput
+Aggressive,1.5×(Fsrc​/Fdest​),Medium (Risk of misses),Highest
+Standard,2.0×(Fsrc​/Fdest​),High (Recommended),Medium
+Conservative,3.0×(Fsrc​/Fdest​),Very High,Lowest
+----------------------------------------------------------------------*/
 module multi_ratio_pulse_sync #(
     parameter CTR_WIDTH = 10
 )(
