@@ -34,6 +34,6 @@ module fast_2_slow_wfb (
   end
 
   //assign out_pulse = sync_in_slow_domain[1] & ~pos_edge_detect_ff; --This posedge detect will not capture all the source domain pulses. It will capture alternate pulses only because every alternate pulse will cause level to fall from pos to neg which will be missed by this. So use level to pulse as shown below;
-  assign out_pulse = sync_in_slow_domain ^ pos_edge_detect_ff;
+    assign out_pulse = sync_in_slow_domain[1] ^ pos_edge_detect_ff;
 
 endmodule
